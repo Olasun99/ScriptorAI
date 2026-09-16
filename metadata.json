@@ -1,0 +1,6 @@
+{
+  "name": "ScriptorAI",
+  "description": "An AI-powered academic writing assistant that improves grammar, readability, tone, and flow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
