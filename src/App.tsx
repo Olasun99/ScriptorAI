@@ -5,6 +5,7 @@ import ProcessingAnimation from './components/ProcessingAnimation';
 import ResultsView from './components/ResultsView';
 import QualitySidebar from './components/QualitySidebar';
 import JobProgressBanner from './components/JobProgressBanner';
+import HistoryView from './components/HistoryView';
 import { ImproveResponse, HistoryItem, DocumentProject, ProcessingJob } from './types';
 
 export default function App() {
@@ -76,6 +77,9 @@ export default function App() {
           if (data.job) {
             setActiveJob(data.job);
             if (data.job.status === 'completed' && data.job.result) {
+              setResult(data.job.result);
+              setOriginalText(project.text);
+              setActiveView('dashboard');
               // Also add to History
               const newItem: HistoryItem = {
                 id: Date.now().toString(),
@@ -256,9 +260,17 @@ export default function App() {
           <div className="flex-1 flex items-center justify-center">
             <ProcessingAnimation />
           </div>
+        ) : activeView === 'history' ? (
+          <HistoryView
+            history={history}
+            onSelectHistory={handleSelectHistory}
+            onClearHistory={handleClearHistory}
+          />
         ) : result && activeView === 'dashboard' ? (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <ResultsView originalText={originalText} result={result} />
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+            <div className="flex-1 overflow-hidden min-h-0">
+              <ResultsView originalText={originalText} result={result} />
+            </div>
             <QualitySidebar scores={result.scores} />
           </div>
         ) : (

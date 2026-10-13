@@ -144,12 +144,22 @@ export default function ResultsView({ originalText, result }: ResultsViewProps) 
   };
 
   const diffs = useMemo(() => {
-    return diffWords(originalText, result.improvedText);
-  }, [originalText, result.improvedText]);
+    return diffWords(originalText || '', result?.improvedText || '');
+  }, [originalText, result?.improvedText]);
+
+  const getNormalizedCategory = (category: string | undefined): 'grammar' | 'structure' | 'style' | 'other' => {
+    if (!category) return 'other';
+    const c = category.toLowerCase();
+    if (c.includes('gram') || c.includes('spell') || c.includes('typo') || c.includes('punct') || c.includes('syntax')) return 'grammar';
+    if (c.includes('struct') || c.includes('flow') || c.includes('cohes') || c.includes('transit') || c.includes('paragr')) return 'structure';
+    if (c.includes('style') || c.includes('tone') || c.includes('acad') || c.includes('concis') || c.includes('form') || c.includes('clar')) return 'style';
+    return 'other';
+  };
 
   const getCategoryColor = (category: string | undefined, isRemoved = false) => {
+    const norm = getNormalizedCategory(category);
     const base = isRemoved ? 'line-through opacity-70' : '';
-    switch (category) {
+    switch (norm) {
       case 'grammar': return `bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 ${base}`;
       case 'structure': return `bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 ${base}`;
       case 'style': return `bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ${base}`;
@@ -158,15 +168,15 @@ export default function ResultsView({ originalText, result }: ResultsViewProps) 
   };
 
   const getPartCategory = (part: any, isRemoved = false) => {
-    if (!result.changes) return 'other';
-    const val = part.value.trim();
+    if (!result?.changes) return 'other';
+    const val = (part.value || '').trim();
     if (!val) return 'other';
     
     const matchingChange = result.changes.find(c => {
       const segment = isRemoved ? c.originalSegment : c.improvedSegment;
       return segment && (segment.includes(val) || val.includes(segment));
     });
-    return matchingChange?.category || 'other';
+    return getNormalizedCategory(matchingChange?.category);
   };
 
   const toggleHighlight = (category: keyof typeof activeHighlights) => {
